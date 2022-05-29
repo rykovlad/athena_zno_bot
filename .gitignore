@@ -2,3 +2,4 @@
 /venv/
 /db/*
 mykey.json
+config.py

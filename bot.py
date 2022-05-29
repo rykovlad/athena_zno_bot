@@ -1,7 +1,12 @@
+import pprint
 import random
 import sqlite3
 import time
 
+from aiogram import Bot, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.utils import executor
+from aiogram.dispatcher import Dispatcher
 from aiogram.types.message import ContentType
 from aiogram.utils.markdown import text, italic, code
 from aiogram.types import ParseMode, ReplyKeyboardMarkup, KeyboardButton
@@ -33,7 +38,8 @@ def log_in_console(message: types.Message):
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     log_in_console(message)
-    await bot.send_message(message.chat.id, 'привіт майбутній студенте, натисни /help')
+    await bot.send_message(message.chat.id, 'привіт майбутній студенте, натисни /help \n'
+                                            'щоб задонатити на збір дронів -> https://t.me/supreme_clown_memes/2177')
 
     with sqlite3.connect(DB_NAME) as db:
         cursor = db.cursor()
@@ -48,7 +54,7 @@ async def process_start_command(message: types.Message):
         if not flag:
             query = f"SELECT COUNT(id) FROM subjects"
             count = cursor.execute(query)
-            full_list = [x for x in range(list(count)[0][0])]
+            full_list = [x+1 for x in range(list(count)[0][0])]
 
             query = f"INSERT INTO users(id_user, name, subjects) VALUES('{message.from_user.id}', " \
                     f"'{taking_name(message)}', '{str(full_list)}') "
@@ -130,6 +136,7 @@ async def process_main_testing1_command(msg: types.Message):
         id_q = singl_quetion[-1]
 
         q = Quetion(singl_quetion)
+        pprint.pprint(q)
         poll = await bot.send_poll(msg.from_user.id, q.question, q.answers,
                                    is_anonymous=False,
                                    correct_option_id=q.correct_answer,
@@ -175,10 +182,12 @@ async def process_get_settings_command(message: types.Message):
         total = list(cursor.execute(query, (message.from_user.id,)))[0][0]
         query = """SELECT count(id) FROM answers WHERE id_user == ? AND is_right == 1"""
         right_answer = list(cursor.execute(query, (message.from_user.id,)))[0][0]
-        if total == 0: total = 1
-        print(total)
-        print(right_answer)
-        msg_answer += "\nstat: " + str(round(right_answer / total, 2)) + "% (" + str(right_answer) + "/" + str(
+        if total:
+            stat = round(right_answer / total, 2)
+        else:
+            stat = 0
+            
+        msg_answer += "\nstat: " + str(stat) + "% (" + str(right_answer) + "/" + str(
             total) + ")"
 
         await bot.send_message(message.from_user.id, msg_answer)

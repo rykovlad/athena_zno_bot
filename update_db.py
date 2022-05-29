@@ -51,7 +51,10 @@ def update_data():
         insert_quetions = []
         with open(filename, 'r') as f:
             for row in csv.reader(f):
-                q = (row[0], int(row[1]) - 1, ";;;".join(row[2:]), i)
+                answers = "@".join(row[2:])
+                while answers[-1] == '@':
+                    answers = answers[0:-1]
+                q = (row[0], int(row[1]) - 1, answers, i)
                 insert_quetions.append(q)
         pprint.pprint(insert_quetions)
 
