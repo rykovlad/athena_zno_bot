@@ -1,5 +1,4 @@
 
-
 class Quetion:
     def __init__(self, data):
         self.question = data[0]

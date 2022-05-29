@@ -1,2 +1,4 @@
 # Project exclude paths
 /venv/
+/db/*
+mykey.json

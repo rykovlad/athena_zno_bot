@@ -1,6 +1,8 @@
 from peewee import *
 
-db = SqliteDatabase('db/athena_zno.db')
+from config import DB_NAME
+
+db = SqliteDatabase(DB_NAME)
 
 
 class BaseModel(Model):
@@ -22,6 +24,7 @@ class Users(BaseModel):
 
 class Subjects(BaseModel):
     subject = CharField(unique=True)
+
     class Meta:
         db_table = "subjects"
 
@@ -34,7 +37,6 @@ class Questions(BaseModel):
 
     class Meta:
         db_table = "questions"
-
 
 
 class Answers(Model):
