@@ -32,10 +32,12 @@ def update_data():
         cursor.execute(query)
         query = "DROP TABLE questions"
         cursor.execute(query)
+        query = "DROP TABLE answers"
+        cursor.execute(query)
         create_tables()
         insert_list_of_subj = []
         for l in lists:
-            insert_list_of_subj.append((l,) )
+            insert_list_of_subj.append((l,))
         query = """INSERT INTO subjects(subject) VALUES(?)"""
         cursor.executemany(query, insert_list_of_subj)
 

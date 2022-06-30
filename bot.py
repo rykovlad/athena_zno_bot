@@ -39,7 +39,8 @@ def log_in_console(message: types.Message):
 async def process_start_command(message: types.Message):
     log_in_console(message)
     await bot.send_message(message.chat.id, 'привіт майбутній студенте, натисни /help \n'
-                                            'щоб задонатити на збір дронів -> https://t.me/supreme_clown_memes/2177')
+                                            'підписуйтесь на канал розробника, тут меми і збори коштів на ЗСУ -> '
+                                            'https://t.me/supreme_clown_memes')
 
     with sqlite3.connect(DB_NAME) as db:
         cursor = db.cursor()
@@ -84,8 +85,27 @@ async def process_update_db_command(message: types.Message):
         await message.reply("ок, зараз", reply=False)
         await bot.send_chat_action(message.from_user.id, "upload_document")
         update_data()
-        time.sleep(3)
+        with sqlite3.connect(DB_NAME) as db:
+            cursor = db.cursor()
+            query = f"SELECT COUNT(id) FROM subjects"
+            count = cursor.execute(query)
+            full_list = [x + 1 for x in range(list(count)[0][0])]
+
+            query = f"SELECT id_user FROM users"
+            users_set_ids = list(cursor.execute(query))
+
+            for user in users_set_ids:
+                await bot.send_message(user[0],
+                                       "база питань оновилась. прогрес був скинутий. обери предмети заново",
+                                       reply_markup=types.ReplyKeyboardRemove())
+                await dp.current_state(user=user).reset_state()
+
+                query = f"UPDATE users SET subjects = '{str(full_list)}' WHERE {user[0]}=id_user"
+                cursor.execute(query)
+
+        time.sleep(2)
         await message.reply("готово", reply=False)
+
     else:
         await message.reply("ти не адмін -_-")
         await bot.send_sticker(message.chat.id,
@@ -136,7 +156,6 @@ async def process_main_testing1_command(msg: types.Message):
         id_q = singl_quetion[-1]
 
         q = Quetion(singl_quetion)
-        pprint.pprint(q)
         poll = await bot.send_poll(msg.from_user.id, q.question, q.answers,
                                    is_anonymous=False,
                                    correct_option_id=q.correct_answer,
@@ -187,7 +206,7 @@ async def process_get_settings_command(message: types.Message):
         else:
             stat = 0
             
-        msg_answer += "\nstat: " + str(stat) + "% (" + str(right_answer) + "/" + str(
+        msg_answer += "\nstat: " + str(stat*100) + "% (" + str(right_answer) + "/" + str(
             total) + ")"
 
         await bot.send_message(message.from_user.id, msg_answer)
